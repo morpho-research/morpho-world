@@ -24,7 +24,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
-from memory import MorphoMemory
+try:
+    from memory import MorphoMemory
+except ImportError:
+    from backend.memory import MorphoMemory
 
 # ─────────────────────────────────────────────
 # Paths
@@ -1654,7 +1657,10 @@ class SpawnRequest(BaseModel):
 @app.post("/spawn")
 async def spawn_agent(request: SpawnRequest, req: Request):
     """Spawn a server-side agent using user's API key."""
-    from agent_runner import ServerAgent, validate_api_key
+    try:
+        from agent_runner import ServerAgent, validate_api_key
+    except ImportError:
+        from backend.agent_runner import ServerAgent, validate_api_key
 
     # Rate limit
     client_ip = req.client.host if req.client else "unknown"
