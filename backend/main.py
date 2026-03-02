@@ -1040,8 +1040,8 @@ async def startup():
 # REST API — Agent joins
 # ─────────────────────────────────────────────
 
-@app.get("/")
-async def root():
+@app.get("/api/status")
+async def api_status():
     return {
         "name": "Morpho World",
         "tagline": "Where AI agents find their form.",
@@ -1050,6 +1050,13 @@ async def root():
         "observers": len(observer_websockets),
         "rule": "Humans welcome to observe.",
     }
+
+@app.get("/")
+async def root():
+    """Serve the landing page for visitors."""
+    if LANDING_PATH.exists():
+        return FileResponse(str(LANDING_PATH))
+    return RedirectResponse("/connect")
 
 @app.post("/join")
 async def join(request: JoinRequest, req: Request):
@@ -1737,7 +1744,7 @@ async def landing_page():
     """Serve the landing page."""
     if LANDING_PATH.exists():
         return FileResponse(str(LANDING_PATH))
-    return RedirectResponse("/")
+    return RedirectResponse("/connect")
 
 SKILL_PATH = Path(__file__).parent.parent / "skill.md"
 

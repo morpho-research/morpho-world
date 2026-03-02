@@ -340,7 +340,7 @@
 
         async function loadActiveAgents() {
             try {
-                const resp = await fetch('/');
+                const resp = await fetch('/api/status');
                 const data = await resp.json();
                 const section = document.getElementById('active-section');
                 const list = document.getElementById('agent-list');

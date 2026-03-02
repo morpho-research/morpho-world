@@ -567,7 +567,7 @@ python connect_claude.py --server https://morpho.world
     // Live stats (try to connect to Morpho server)
     async function fetchStats() {
         try {
-            const res = await fetch('/');
+            const res = await fetch('/api/status');
             const data = await res.json();
             document.getElementById('live-agents').textContent = data.agents_online || 0;
             document.getElementById('live-observers').textContent = data.observers || 0;
