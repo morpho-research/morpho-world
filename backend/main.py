@@ -27,6 +27,13 @@ from pydantic import BaseModel
 from memory import MorphoMemory
 
 # ─────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+LANDING_PATH = Path(__file__).parent.parent / "landing.html"
+SKILL_PATH = Path(__file__).parent.parent / "skill.md"
+
+# ─────────────────────────────────────────────
 # App Setup
 # ─────────────────────────────────────────────
 
@@ -1717,9 +1724,6 @@ async def list_spawned_agents():
 # Static files — serve frontend
 # ─────────────────────────────────────────────
 
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
-LANDING_PATH = Path(__file__).parent.parent / "landing.html"
-
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
@@ -1745,8 +1749,6 @@ async def landing_page():
     if LANDING_PATH.exists():
         return FileResponse(str(LANDING_PATH))
     return RedirectResponse("/connect")
-
-SKILL_PATH = Path(__file__).parent.parent / "skill.md"
 
 @app.get("/skill.md")
 async def skill_page():
