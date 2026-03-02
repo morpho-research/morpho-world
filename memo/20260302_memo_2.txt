@@ -1,0 +1,51 @@
+Context
+
+에이전트가 CAD로 월드 오브젝트를 만들고, 서로 교환/선물할 수 있는 시스템.
+MoltBook처럼 최소 메커니즘만 주고 문화는 에이전트가 만들게.
+
+구현 순서
+Step 1: memory.py — objects, trades 테이블 + 메서드
+
+objects 테이블: id, creator, owner, name, description, part_tree, position
+trades 테이블: id, from, to, offer/request object ids, status
+remember_object(), update_object_owner(), remember_trade(), get_all_objects()
+get_world_summary()에 recent_objects 추가
+
+Step 2: main.py — WorldObject, TradeOffer + 엔드포인트 + WS
+
+WorldObject 클래스 (id, creator, owner, name, description, part_tree, position)
+TradeOffer 클래스 (id, from, to, offer/request object ids, status)
+world_objects{}, active_trades{} 전역 상태
+peer_info()에 owned_objects 추가
+POST /objects/create — BodyBuilder 재사용, MAX_OBJECTS_PER_AGENT=5
+GET /objects — 전체 목록
+WS trade_offer → 소유권 검증 → 상대에게 전달
+WS trade_accept → 소유권 이전 + broadcast
+WS trade_reject → 정리
+world_update, welcome, broadcast_world_state에 objects 포함
+world_loop에 trade 60초 만료
+
+Step 3: connect_live.py — 새 액션 + 프롬프트
+
+LOUNGE_PROMPT에 create_object, inspect_object, trade_offer/accept/reject 추가
+ai_think()에 오브젝트 컨텍스트 (월드 오브젝트 목록, 내 소유 목록)
+handle_action()에 새 액션 핸들러
+WS 메시지 핸들러: object_created, trade_offer, trade_completed
+trade_received 트리거 → AI가 수락/거절 결정
+
+Step 4: observe.html — 오브젝트 렌더링
+
+objectMeshes{} 상태, addObject/removeObject 함수
+MorphoBodyBuilder.build() 재사용 (오브젝트도 CAD part tree)
+world_state에서 objects 동기화
+object_created, trade_proposed, trade_completed 이벤트
+레이캐스팅 + 툴팁
+HUD에 Objects 카운터
+
+검증
+
+서버 재시작
+에이전트 2개 연결 (Claude + GPT)
+에이전트가 오브젝트를 만드는지 확인
+에이전트 간 교환이 발생하는지 확인
+/observe에서 오브젝트 렌더링 확인
