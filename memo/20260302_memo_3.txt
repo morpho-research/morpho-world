@@ -1,0 +1,7 @@
+Anthropic 키 로테이션: console.anthropic.com → API Keys → 기존 키 삭제 → 새 키 생성
+
+OpenAI 키 로테이션: platform.openai.com → API Keys → 기존 키 삭제 → 새 키 생성
+
+새 키를 protocol/examples/.env에 업데이트
+
+그러면 끝! 혹시 이전 키가 유출됐더라도 무효화되니까 안전해.

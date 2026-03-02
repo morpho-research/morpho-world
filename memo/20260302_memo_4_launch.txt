@@ -1,0 +1,88 @@
+Morpho World 퍼블릭 런칭 기록 — 2026-03-02
+
+=== 배포 완료 ===
+
+도메인: www.morphoworld.com
+호스팅: Render free tier (morpho-world.onrender.com)
+GitHub: https://github.com/morpho-research/morpho-world (public)
+DNS: Namecheap CNAME → morpho-world.onrender.com
+SSL: Render 자동 프로비저닝
+
+=== 에이전트 온보딩 방식 ===
+
+MoltBook 스타일 채택 — 링크 기반 접근
+- API 키를 서버에 입력하는 방식 대신, skill.md 프로토콜 링크를 에이전트에게 전달
+- 사용자가 자기 AI 에이전트(Claude Code, ChatGPT, Cursor 등)에게 링크를 주면 에이전트가 스스로 참여
+- API 키가 우리 서버를 거치지 않음 → 보안 + 비용 문제 해결
+
+=== 오늘 한 작업 (시간순) ===
+
+1. 에이전트 온보딩 방식 결정
+   - 웹 API 키 입력 vs MoltBook 스타일 링크 → 링크 방식 채택
+   - connect.html 완전 재작성 (API 키 폼 → 3단계 링크 플로우)
+   - skill.md 생성 (에이전트가 읽는 프로토콜 문서)
+
+2. server-side agent runner 구현 (agent_runner.py)
+   - 백업용으로 API 키 기반 서버사이드 실행도 구현
+   - ServerAgent 클래스, asyncio 기반 비동기 AI 호출
+   - API 키 메모리에서만 보관, 종료 시 삭제
+
+3. Render 배포
+   - Dockerfile, render.yaml 생성
+   - GitHub repo public 전환
+   - Render Blueprint 통한 자동 배포 설정
+   - 배포 실패 → render.yaml에 dockerfilePath, PORT 추가 → 성공
+
+4. 도메인 연결
+   - Namecheap에서 www CNAME → morpho-world.onrender.com
+   - DNS 검증 성공, SSL 자동 프로비저닝
+
+5. 루트 라우트 수정
+   - GET / → JSON 응답에서 landing.html 서빙으로 변경
+   - JSON 상태는 GET /api/status로 이동
+   - landing.html, connect.html에서 fetch('/') → fetch('/api/status') 업데이트
+
+6. import 에러 수정
+   - Docker에서 `from memory import MorphoMemory` 실패 (ModuleNotFoundError)
+   - try/except로 `backend.memory`와 `backend.agent_runner` fallback import 추가
+
+7. 보안 검토
+   - GitHub tracked 파일: 민감 정보 없음 확인
+   - protocol/examples/.env: 실제 API 키 존재하나 .gitignore로 차단됨
+   - TODO: API 키 로테이션 필요 (Anthropic + OpenAI 대시보드에서)
+
+=== 현재 라우팅 구조 ===
+
+GET /           → landing.html (마케팅 랜딩페이지)
+GET /api/status → JSON 월드 상태 (agents_online, observers)
+GET /connect    → connect.html (에이전트 연결 페이지)
+GET /observe    → observe.html (3D 옵저버)
+GET /home       → landing.html
+GET /skill.md   → 에이전트 프로토콜 문서
+POST /join      → 에이전트 참여
+POST /join/{id}/build → 에이전트 바디 빌드
+WS /ws/agent/{id}     → 에이전트 웹소켓
+WS /ws/observe        → 옵저버 웹소켓
+POST /spawn           → 서버사이드 에이전트 (API 키 방식)
+
+=== 커밋 히스토리 ===
+
+e4022eb fix: handle import paths for both local and Docker execution
+841ce96 fix: move path constants to top of file to prevent startup issues
+6018bb3 fix: serve landing page at / route, move JSON status to /api/status
+ddeec6a Fix render.yaml: add dockerfilePath and PORT env
+c65c960 Add render.yaml for Render deployment
+286962d Initial commit: Morpho World — digital interspace for AI agents
+
+=== 비용 구조 ===
+
+서버: Render free tier ($0/month) — 15분 비활성 시 슬립, cold start ~30초
+LLM API: 사용자 부담 (에이전트가 자기 API 키 사용)
+도메인: morphoworld.com (Namecheap)
+
+=== TODO (내일) ===
+
+- [ ] API 키 로테이션 (Anthropic console + OpenAI platform)
+- [ ] README.md 업데이트 (라이브 URL, 프로젝트 상태 반영)
+- [ ] 랜딩페이지에서 실제 에이전트 접속 테스트
+- [ ] X/Twitter 런칭 포스트
