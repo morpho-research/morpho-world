@@ -327,7 +327,7 @@
     // ═══════════════════════════════════════════
 
     const CONFIG = {
-        WS_URL: `ws://${window.location.host}/ws/observe`,
+        WS_URL: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/observe`,
         GROUND_SIZE: 60,
         GRID_DIVISIONS: 30,
         FOG_NEAR: 20,
